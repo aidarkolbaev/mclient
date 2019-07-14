@@ -10,12 +10,12 @@ interface MemcachedInterface
     /**
      * Memcached set command is used to set a new value to a new or existing key.
      * @param string $key
-     * @param int|string|float $value
-     * @param int $expiration
+     * @param int|string $value
+     * @param int $exptime
      * @param int $flags
      * @return bool
      */
-    public function set($key, $value, $expiration = 0, $flags = 0);
+    public function set($key, $value, $exptime = 0, $flags = 0);
 
     /**
      * Memcached get command is used to get the value stored at key.
