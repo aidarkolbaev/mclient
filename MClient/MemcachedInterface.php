@@ -32,4 +32,11 @@ interface MemcachedInterface
      * @return bool
      */
     public function delete($key);
+
+    /**
+     * Perform requests asynchronously
+     * @param $bool
+     * @return void
+     */
+    public function async($bool);
 }

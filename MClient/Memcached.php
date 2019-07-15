@@ -40,13 +40,13 @@ class Memcached implements MemcachedInterface
     {
         // set key flags exptime bytes [noreply]
         // value
-        if (!preg_match("/^\S+$/ui", $key)) {
+        if (!preg_match("/^\S+$/ui", $key) || empty(trim($value))) {
             return false;
         }
         $value = (string)$value;
         $bytes = strlen($value);
-        $command = "set {$key} {$flags} {$exptime} {$bytes}\r\n{$value}\r\n";
-        return strpos($this->request($command), 'STORED') !== false;
+        $this->request("set {$key} {$flags} {$exptime} {$bytes}\r\n{$value}\r\n");
+        return strpos($this->getResponse(), 'STORED') !== false;
     }
 
     /**
@@ -63,9 +63,8 @@ class Memcached implements MemcachedInterface
             $length = $length * count($key);
             $key = implode(" ", $key);
         }
-        $command = "get {$key}\r\n";
-        $response = $this->parseResponse($this->request($command, $length));
-        return !empty($response) ? $response : null;
+        $this->request("get {$key}\r\n");
+        return $this->parseResponse($this->getResponse($length));
     }
 
     /**
@@ -75,19 +74,36 @@ class Memcached implements MemcachedInterface
      */
     public function delete($key)
     {
-        // TODO: Implement delete() method.
+        // delete key [noreply]
+        $this->request("delete {$key}\r\n");
+        return preg_match("/(DELETED|NOT_FOUND)/", $this->getResponse()) == 1;
+    }
+
+    /**
+     * @param $bool
+     */
+    public function async($bool)
+    {
+        $bool ? socket_set_nonblock($this->connection) : socket_set_block($this->connection);
+    }
+
+    /**
+     * Sends command to the Memcached server
+     * @param $cmd
+     * @return bool
+     */
+    private function request($cmd)
+    {
+        return (bool)socket_write($this->connection, $cmd);
     }
 
 
     /**
-     * Executes command and returns response
-     * @param $cmd
      * @param int $response_length
      * @return string
      */
-    private function request($cmd, $response_length = 1024)
+    private function getResponse($response_length = 1024)
     {
-        socket_write($this->connection, $cmd);
         return socket_read($this->connection, $response_length);
     }
 
@@ -96,14 +112,11 @@ class Memcached implements MemcachedInterface
      * @return string|array
      */
     private function parseResponse($response) {
-        $matches = [];
-        preg_match_all("/VALUE \S+ \d+ (?<bytes>\d+)[ \d]*\s+/", $response, $matches);
-        $values = [];
-        for ($i = 0; $i < count($matches[0]); $i++) {
-            $response = preg_replace("/\s*" . $matches[0][$i] . "\s*/", "", $response);
-            $values[] = substr($response,0, (int)$matches['bytes'][$i]);
-            $response = str_replace($values[$i], "", $response);
+        $values = preg_split("/(\s*VALUE \S+ \d+ \d+[ \d]*|(\\r\\n)?(END|NOT_FOUND|ERROR))\s+/", $response);
+        $values = array_filter($values);
+        if (!empty($values)) {
+            return count($values) === 1 ? array_shift($values) : $values;
         }
-        return count($values) === 1 ? array_shift($values) : $values;
+        return null;
     }
 }
