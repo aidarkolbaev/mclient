@@ -1,0 +1,10 @@
+language: php
+php:
+  - '7.0'
+services:
+  - memcached
+install:
+  - composer install
+script:
+  - phpunit tests/*
+  - composer phpcs MClient/ tests/

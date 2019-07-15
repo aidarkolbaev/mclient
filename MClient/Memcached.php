@@ -111,7 +111,8 @@ class Memcached implements MemcachedInterface
      * @param string $response
      * @return string|array
      */
-    private function parseResponse($response) {
+    private function parseResponse($response)
+    {
         $values = preg_split("/(\s*VALUE \S+ \d+ \d+[ \d]*|(\\r\\n)?(END|NOT_FOUND|ERROR))\s+/", $response);
         $values = array_filter($values);
         if (!empty($values)) {
