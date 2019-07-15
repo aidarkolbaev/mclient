@@ -1,6 +1,6 @@
 <?php
 
-namespace MClient\Tests;
+namespace Tests;
 
 use MClient\Memcached;
 use MClient\MemcachedInterface;
