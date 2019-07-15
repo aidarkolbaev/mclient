@@ -1,8 +1,8 @@
 {
-  "name": "aidarkolbaev/mclient",
+  "name": "aidarkolbaev/memclient",
   "type": "library",
   "description": "Pure PHP Memcached client",
-  "homepage": "https://github.com/aidarkolbaev/mclient",
+  "homepage": "https://github.com/aidarkolbaev/memclient",
   "license": "MIT",
   "authors": [
     {
@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit tests/",
+    "test": "vendor/bin/phpunit",
     "phpcs": "phpcs --standard=PSR2 MClient/ tests/"
   }
 }

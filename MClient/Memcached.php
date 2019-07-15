@@ -7,6 +7,12 @@ class Memcached implements MemcachedInterface
     /** @var resource */
     private $connection;
 
+    /** @var bool */
+    private $asynchronous = false;
+
+    /** @var string */
+    private $noreply = "";
+
     /**
      * @param string $host
      * @param int $port
@@ -15,10 +21,10 @@ class Memcached implements MemcachedInterface
     public function __construct($host = "127.0.0.1", $port = 11211)
     {
         $connection = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        socket_set_option($connection, SOL_SOCKET, SO_RCVTIMEO, ["sec" => 1, "usec" => 0]);
-        if (!socket_connect($connection, $host, $port)) {
-            socket_close($connection);
-            throw new \Exception("Connection refused");
+        $ok = socket_set_option($connection, SOL_SOCKET, SO_RCVTIMEO, ["sec" => 1, "usec" => 0]);
+        $ok = socket_connect($connection, $host, $port) && $ok && $connection !== false;
+        if (!$ok) {
+            throw new \Exception(socket_last_error($connection));
         }
         $this->connection = $connection;
     }
@@ -45,7 +51,7 @@ class Memcached implements MemcachedInterface
         }
         $value = (string)$value;
         $bytes = strlen($value);
-        $this->request("set {$key} {$flags} {$exptime} {$bytes}\r\n{$value}\r\n");
+        $this->request("set {$key} {$flags} {$exptime} {$bytes}{$this->noreply}\r\n{$value}\r\n");
         return strpos($this->getResponse(), 'STORED') !== false;
     }
 
@@ -75,7 +81,7 @@ class Memcached implements MemcachedInterface
     public function delete($key)
     {
         // delete key [noreply]
-        $this->request("delete {$key}\r\n");
+        $this->request("delete {$key}{$this->noreply}\r\n");
         return preg_match("/(DELETED|NOT_FOUND)/", $this->getResponse()) == 1;
     }
 
@@ -84,6 +90,8 @@ class Memcached implements MemcachedInterface
      */
     public function async($bool)
     {
+        $this->asynchronous = $bool;
+        $this->noreply = $bool ? " noreply" : "";
         $bool ? socket_set_nonblock($this->connection) : socket_set_block($this->connection);
     }
 
