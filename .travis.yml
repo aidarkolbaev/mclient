@@ -7,4 +7,4 @@ install:
   - composer install
 script:
   - composer phpcs
-  - phpunit tests/*
+  - composer test tests/
