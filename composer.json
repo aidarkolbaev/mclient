@@ -11,7 +11,7 @@
     }
   ],
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "ext-sockets": "*"
   },
   "require-dev": {
@@ -29,7 +29,7 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit",
-    "phpcs": "phpcs --standard=PSR2"
+    "test": "vendor/bin/phpunit tests/",
+    "phpcs": "phpcs --standard=PSR2 MClient/ tests/"
   }
 }
