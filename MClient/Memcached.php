@@ -69,7 +69,9 @@ class Memcached implements MemcachedInterface
     public function get($key)
     {
         $length = 1024 + 30;
+        $keys = [];
         if (is_array($key)) {
+            $keys = $key;
             $length = $length * count($key);
             $key = implode(" ", $key);
         }
@@ -78,7 +80,15 @@ class Memcached implements MemcachedInterface
             $this->asyncRequestsCount++;
             return $ok;
         }
-        return $this->parseResponse($this->getResponse($length));
+        $response = $this->parseResponse($this->getResponse($length));
+        if (is_array($response)) {
+            if (!empty($keys) && is_array($keys)) {
+                $result = array_intersect_key(($response),array_flip($keys));
+                return !empty($result) ? $result : null;
+            }
+            return !empty($response[$key]) ? $response[$key] : null;
+        }
+        return $response;
     }
 
     /**
