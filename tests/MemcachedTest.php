@@ -34,7 +34,13 @@ class MemcachedTest extends TestCase
         $this->assertEquals("Some value", $memcached->get("testing"));
         $this->assertEquals("Some - \ntext\n", $memcached->get("test"));
         $this->assertEmpty($memcached->get("nonexistent"));
-        $this->assertEqualsCanonicalizing(["Some value", "Some - \ntext\n"], $memcached->get(["testing", "test"]));
+        $this->assertEqualsCanonicalizing(
+            [
+                "testing" => "Some value",
+                "test" => "Some - \ntext\n"
+            ],
+            $memcached->get(["testing", "test"])
+        );
         return $memcached;
     }
 
@@ -83,9 +89,9 @@ class MemcachedTest extends TestCase
         $this->assertTrue($memcached->get("key"));
         $this->assertTrue($memcached->get("big_value"));
         $expected = [
-            "Memcached",
-            "Value",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam molestie nisi a dolor
+            "async_test" => "Memcached",
+            "key" => "Value",
+            "big_value" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam molestie nisi a dolor
              fringilla. Nunc massa nisi, dignissim ac tempor sed, rutrum a neque. Mauris et diam congue,
              urna vitae, sagittis ante. Sed id fringilla justo. Aliquam vitae varius ante.
              nt in sem nibh. Curabitur vitae erat sed urna lacinia molestie. In viverra mollis diam at blandit.
@@ -110,5 +116,6 @@ class MemcachedTest extends TestCase
     {
         $this->assertTrue($memcached->delete("key"));
         $this->assertTrue($memcached->delete("async_test"));
+        $this->assertTrue($memcached->delete("big_value"));
     }
 }

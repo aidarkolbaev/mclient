@@ -163,10 +163,20 @@ class Memcached implements MemcachedInterface
      */
     private function parseResponse($response)
     {
+        $matches = [];
+        preg_match_all("/\s*VALUE (?<keys>\S+) \d+ \d+[ \d]*\s+/", $response, $matches);
         $values = preg_split("/(\s*VALUE \S+ \d+ \d+[ \d]*|(\\r\\n)?(END|NOT_FOUND|ERROR))\s+/", $response);
         $values = array_filter($values);
+        $values = array_values($values);
         if (!empty($values)) {
-            return count($values) === 1 ? array_shift($values) : $values;
+            if (count($values) === 1) {
+                return array_shift($values);
+            }
+            $result = [];
+            for ($i = 0; $i < count($values); $i++) {
+                $result[$matches["keys"][$i]] = $values[$i];
+            }
+            return $result;
         }
         return null;
     }
