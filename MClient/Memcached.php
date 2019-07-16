@@ -83,7 +83,7 @@ class Memcached implements MemcachedInterface
         $response = $this->parseResponse($this->getResponse($length));
         if (is_array($response)) {
             if (!empty($keys) && is_array($keys)) {
-                $result = array_intersect_key(($response),array_flip($keys));
+                $result = array_intersect_key(($response), array_flip($keys));
                 return !empty($result) ? $result : null;
             }
             return !empty($response[$key]) ? $response[$key] : null;
