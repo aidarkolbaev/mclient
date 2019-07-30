@@ -15,18 +15,18 @@ $memcached = new \MClient\Memcached();
 // In seconds
 $expiration = 30;
 
-// to store value
+// to store data
 $memcached->set("key", "value", $expiration);
 
-// to retrieve value
+// to retrieve data
 $memcached->get("key");
 
-// to delete value
+// to delete data
 $memcached->delete("key");
 
 // to enable asynchronous mode
 $memcached->async(true);
 
-// Retrieves values called by get() method in asynchronous mode
+// Retrieves data called by get() method in asynchronous mode
 $memcached->receive();
 ```
